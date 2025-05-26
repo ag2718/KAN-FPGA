@@ -1,37 +1,16 @@
-"""
- @file   00_train.py
- @brief  Script for training
- @author Toshiki Nakamura, Yuki Nikaido, and Yohei Kawaguchi (Hitachi Ltd.)
- Copyright (C) 2020 Hitachi, Ltd. All right reserved.
-"""
-
-########################################################################
-# import default python-library
-########################################################################
 import os
 import glob
 import sys
-########################################################################
 
+import torch
 
-########################################################################
-# import additional python-library
-########################################################################
 import numpy
-# from import
 from tqdm import tqdm
-# original lib
 import common as com
-import keras_model
-########################################################################
 
+from model import AutoEncoder, fit
 
-########################################################################
-# load parameter.yaml
-########################################################################
 param = com.yaml_load()
-########################################################################
-
 
 ########################################################################
 # visualizer
@@ -165,6 +144,14 @@ if __name__ == "__main__":
     # load base_directory list
     dirs = com.select_dirs(param=param, mode=mode)
 
+    print(f"{param=}")
+
+    MODEL_NAME = "kan"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+    os.makedirs(MODEL_NAME)
+
     # loop of the base directory
     for idx, target_dir in enumerate(dirs):
         print("\n===========================")
@@ -172,7 +159,7 @@ if __name__ == "__main__":
 
         # set path
         machine_type = os.path.split(target_dir)[1]
-        model_file_path = "{model}/model_{machine_type}.hdf5".format(model=param["model_directory"],
+        model_file_path = "{model}/model_{machine_type}.pth".format(model=MODEL_NAME,
                                                                      machine_type=machine_type)
         history_img = "{model}/history_{machine_type}.png".format(model=param["model_directory"],
                                                                   machine_type=machine_type)
@@ -192,22 +179,25 @@ if __name__ == "__main__":
                                           hop_length=param["feature"]["hop_length"],
                                           power=param["feature"]["power"])
 
+
         # train model
         print("============== MODEL TRAINING ==============")
-        model = keras_model.get_model(param["feature"]["n_mels"] * param["feature"]["frames"])
-        model.summary()
 
-        model.compile(**param["fit"]["compile"])
-        history = model.fit(train_data,
-                            train_data,
-                            epochs=param["fit"]["epochs"],
-                            batch_size=param["fit"]["batch_size"],
-                            shuffle=param["fit"]["shuffle"],
-                            validation_split=param["fit"]["validation_split"],
-                            verbose=param["fit"]["verbose"])
+        data_loader = torch.utils.data.DataLoader(
+            torch.from_numpy(train_data).float().to(device),
+            batch_size=param["fit"]["batch_size"],
+            shuffle=True,
+        )
+
+        best_model, train_losses, val_losses = fit(model_name=MODEL_NAME, 
+                    num_inputs=param["feature"]["n_mels"] * param["feature"]["frames"],
+                    data_loader=data_loader,
+                    num_epochs=param["fit"]["epochs"],
+                    validation_split=param["fit"]["validation_split"],
+                    device=device)
         
-        visualizer.loss_plot(history.history["loss"], history.history["val_loss"])
+        visualizer.loss_plot(train_losses, val_losses)
         visualizer.save_figure(history_img)
-        model.save(model_file_path)
+        torch.save(best_model, model_file_path)
         com.logger.info("save_model -> {}".format(model_file_path))
         print("============== END TRAINING ==============")

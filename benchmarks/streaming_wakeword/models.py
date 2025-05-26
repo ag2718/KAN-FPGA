@@ -1,7 +1,7 @@
 
 from torch import nn
-from KAN_Conv_Impl.KANLinear import KANLinear
-from KAN_Conv_Impl.KANConv import KANConv 
+from KAN_Impl.KANLinear import KANLinear
+from KAN_Impl.KANConv import KANConv 
 
 def make_kan_cnn():
 

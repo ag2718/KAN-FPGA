@@ -29,8 +29,8 @@ from torch.utils.data import TensorDataset, DataLoader
 torch.cuda.empty_cache()
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-from KAN_Conv_Impl.KANLinear import KANLinear
-from KAN_Conv_Impl.KANConv import KANConv 
+from KAN_Impl.KANLinear import KANLinear
+from KAN_Impl.KANConv import KANConv 
 
 from sklearn.metrics import roc_curve, auc
 import matplotlib.pyplot as plt

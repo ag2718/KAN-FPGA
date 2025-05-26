@@ -32,6 +32,7 @@ import librosa.display
 
 ########################################################################
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 ########################################################################
 # setup STD I/O
@@ -41,7 +42,8 @@ Standard output is logged in "baseline.log".
 """
 import logging
 
-logging.basicConfig(level=logging.DEBUG, filename="baseline.log")
+log_path = os.path.abspath(os.path.join(BASE_DIR, "baseline.log"))
+logging.basicConfig(level=logging.DEBUG, filename=log_path)
 logger = logging.getLogger(' ')
 handler = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -89,7 +91,10 @@ def command_line_chk():
 # load parameter.yaml
 ########################################################################
 def yaml_load():
-    with open("baseline.yaml") as stream:
+    yaml_path = "baseline.yaml"
+    if not os.path.isabs(yaml_path):
+        yaml_path = os.path.join(BASE_DIR, yaml_path)
+    with open(yaml_path) as stream:
         param = yaml.safe_load(stream)
     return param
 
@@ -114,14 +119,20 @@ def file_load(wav_name, mono=False):
     return : numpy.array( float )
     """
     try:
-        return librosa.load(wav_name, sr=None, mono=mono)
+        path = wav_name
+        if not os.path.isabs(path):
+            path = os.path.join(BASE_DIR, path)
+        return librosa.load(path, sr=None, mono=mono)
     except:
         logger.error("file_broken or not exists!! : {}".format(wav_name))
 
 
 def save_csv(save_file_path,
              save_data):
-    with open(save_file_path, "w", newline="") as f:
+    path = save_file_path
+    if not os.path.isabs(path):
+        path = os.path.join(BASE_DIR, path)
+    with open(path, "w", newline="") as f:
         writer = csv.writer(f, lineterminator='\n')
         writer.writerows(save_data)
 
@@ -157,7 +168,10 @@ def file_to_vector_array(file_name,
     dims = n_mels * frames
 
     # 02 generate melspectrogram
-    y, sr = file_load(file_name)
+    path = file_name
+    if not os.path.isabs(path):
+        path = os.path.join(BASE_DIR, path)
+    y, sr = file_load(path)
     if method == "librosa":
         # 02a generate melspectrogram using librosa
         mel_spectrogram = librosa.feature.melspectrogram(y=y,
@@ -192,28 +206,33 @@ def file_to_vector_array(file_name,
 
     # 07 (optional) save histogram in png
     if save_png:
-        save_path = file_name.replace('.wav', '_hist_' + method + '.png')
+        save_path = path.replace('.wav', '_hist_' + method + '.png')
+        if not os.path.isabs(save_path):
+            save_path = os.path.join(BASE_DIR, save_path)
         librosa.display.specshow(log_mel_spectrogram)
         pylab.savefig(save_path, bbox_inches=None, pad_inches=0)
         pylab.close()
 
     # 08 (optional) save histogram
     if save_hist:
-        save_path = file_name.replace('.wav', '_hist_' + method + '.txt')
-        # transpose to obtain correct order
+        save_path = path.replace('.wav', '_hist_' + method + '.txt')
+        if not os.path.isabs(save_path):
+            save_path = os.path.join(BASE_DIR, save_path)
         numpy.swapaxes(log_mel_spectrogram, 0, 1).tofile(save_path, sep=",")
 
     # 08 (optional) save bin
     if save_bin:
-        save_path = file_name.replace('.wav', '_hist_' + method + '.bin')
-        # transpose to obtain correct order
+        save_path = path.replace('.wav', '_hist_' + method + '.bin')
+        if not os.path.isabs(save_path):
+            save_path = os.path.join(BASE_DIR, save_path)
         numpy.swapaxes(log_mel_spectrogram, 0, 1).astype('float32').tofile(save_path)
 
     # 08 (optional) save parts (sliding window)
     if save_parts:
         for i in range(vector_array_size):
-            save_path = file_name.replace('.wav', '_hist_' + method + '_part{0:03d}'.format(i) + '.bin')
-            # transpose to obtain correct order?
+            save_path = path.replace('.wav', '_hist_' + method + f'_part{i:03d}.bin')
+            if not os.path.isabs(save_path):
+                save_path = os.path.join(BASE_DIR, save_path)
             vector_array[i].astype('float32').tofile(save_path)
 
     return vector_array
@@ -235,11 +254,17 @@ def select_dirs(param, mode):
     """
     if mode:
         logger.info("load_directory <- development")
-        dir_path = os.path.abspath("{base}/*".format(base=param["dev_directory"]))
+        dir_path = param["dev_directory"]
+        if not os.path.isabs(dir_path):
+            dir_path = os.path.join(BASE_DIR, dir_path)
+        dir_path = f"{dir_path}/*"
         dirs = sorted(glob.glob(dir_path))
     else:
         logger.info("load_directory <- evaluation")
-        dir_path = os.path.abspath("{base}/*".format(base=param["eval_directory"]))
+        dir_path = param["eval_directory"]
+        if not os.path.isabs(dir_path):
+            dir_path = os.path.join(BASE_DIR, dir_path)
+        dir_path = f"{dir_path}/*"
         dirs = sorted(glob.glob(dir_path))
     return dirs
 
@@ -262,7 +287,9 @@ def get_machine_id_list_for_test(target_dir,
             list of machine IDs extracted from the names of test files
     """
     # create test files
-    dir_path = os.path.abspath("{dir}/{dir_name}/*.{ext}".format(dir=target_dir, dir_name=dir_name, ext=ext))
+    dir_path = f"{target_dir}/{dir_name}/*.{ext}"
+    if not os.path.isabs(dir_path):
+        dir_path = os.path.join(BASE_DIR, dir_path)
     file_paths = sorted(glob.glob(dir_path))
     # extract id
     machine_id_list = sorted(list(set(itertools.chain.from_iterable(
@@ -306,19 +333,15 @@ def test_file_list_generator(target_dir,
 
     # development
     if mode:
-        normal_files = sorted(
-            glob.glob("{dir}/{dir_name}/{prefix_normal}_{id_name}*.{ext}".format(dir=target_dir,
-                                                                                 dir_name=dir_name,
-                                                                                 prefix_normal=prefix_normal,
-                                                                                 id_name=id_name,
-                                                                                 ext=ext)))
+        normal_path = f"{target_dir}/{dir_name}/{prefix_normal}_{id_name}*.{ext}"
+        if not os.path.isabs(normal_path):
+            normal_path = os.path.join(BASE_DIR, normal_path)
+        normal_files = sorted(glob.glob(normal_path))
         normal_labels = numpy.zeros(len(normal_files))
-        anomaly_files = sorted(
-            glob.glob("{dir}/{dir_name}/{prefix_anomaly}_{id_name}*.{ext}".format(dir=target_dir,
-                                                                                  dir_name=dir_name,
-                                                                                  prefix_anomaly=prefix_anomaly,
-                                                                                  id_name=id_name,
-                                                                                  ext=ext)))
+        anomaly_path = f"{target_dir}/{dir_name}/{prefix_anomaly}_{id_name}*.{ext}"
+        if not os.path.isabs(anomaly_path):
+            anomaly_path = os.path.join(BASE_DIR, anomaly_path)
+        anomaly_files = sorted(glob.glob(anomaly_path))
         anomaly_labels = numpy.ones(len(anomaly_files))
         files = numpy.concatenate((normal_files, anomaly_files), axis=0)
         labels = numpy.concatenate((normal_labels, anomaly_labels), axis=0)
@@ -329,11 +352,10 @@ def test_file_list_generator(target_dir,
 
     # evaluation
     else:
-        files = sorted(
-            glob.glob("{dir}/{dir_name}/*{id_name}*.{ext}".format(dir=target_dir,
-                                                                  dir_name=dir_name,
-                                                                  id_name=id_name,
-                                                                  ext=ext)))
+        eval_path = f"{target_dir}/{dir_name}/*{id_name}*.{ext}"
+        if not os.path.isabs(eval_path):
+            eval_path = os.path.join(BASE_DIR, eval_path)
+        files = sorted(glob.glob(eval_path))
         labels = None
         logger.info("test_file  num : {num}".format(num=len(files)))
         if len(files) == 0:
@@ -369,7 +391,10 @@ def list_to_vector_array(file_list,
 
     # iterate file_to_vector_array()
     for idx in tqdm(range(len(file_list)), desc=msg):
-        vector_array = file_to_vector_array(file_list[idx],
+        path = file_list[idx]
+        if not os.path.isabs(path):
+            path = os.path.join(BASE_DIR, path)
+        vector_array = file_to_vector_array(path,
                                                 n_mels=n_mels,
                                                 frames=frames,
                                                 n_fft=n_fft,
@@ -400,7 +425,9 @@ def file_list_generator(target_dir,
     logger.info("target_dir : {}".format(target_dir))
 
     # generate training list
-    training_list_path = os.path.abspath("{dir}/{dir_name}/*.{ext}".format(dir=target_dir, dir_name=dir_name, ext=ext))
+    training_list_path = f"{target_dir}/{dir_name}/*.{ext}"
+    if not os.path.isabs(training_list_path):
+        training_list_path = os.path.join(BASE_DIR, training_list_path)
     files = sorted(glob.glob(training_list_path))
     if len(files) == 0:
         logger.exception("no_wav_file!!")

@@ -1,3 +1,4 @@
+import json
 from efficient_kan import KAN
 import torch
 import os
@@ -16,6 +17,8 @@ BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 # GRID_RANGE = [-8, 8]
 
 # model = torch.load(MODEL_PATH, weights_only=False)
+
+MAX_RESOLUTION = 256
 
 def generate_defines_h(model, resolution=256, tot_precision=16, float_precision=6):
 
@@ -69,16 +72,30 @@ def get_activation_values(model, layer_i, inp_node, out_node, grid_range=[-8, 8]
 
     return (base_output + spline_output).tolist()
 
-def generate_values_h(model, grid_range, resolution):
+def generate_values_cache(model, grid_range):
+
+    cache = {}
+    for i, layer in enumerate(model.layers):
+        for j in range(layer.in_features):
+            for k in range(layer.out_features):
+                print(f"Processing lut_{i}_{j}_{k}...")
+                cache[f"lut_{i}_{j}_{k}"] = get_activation_values(model, i, j, k, grid_range=grid_range, resolution=MAX_RESOLUTION)
+
+    return cache
+
+def generate_values_h(model, grid_range, resolution, cache):
 
     with open(f"{BASE_PATH}/templates/values_header.txt", "r") as f:
         values_file_contents = f.read()
+
+    assert resolution <= MAX_RESOLUTION
+    assert MAX_RESOLUTION % resolution == 0
     
     for i, layer in enumerate(model.layers):
         for j in range(layer.in_features):
             for k in range(layer.out_features):
 
-                value_table = get_activation_values(model, i, j, k, grid_range=grid_range, resolution=resolution)
+                value_table = cache[f"lut_{i}_{j}_{k}"][::MAX_RESOLUTION//resolution]
 
                 formatted_tbl = '\n'.join(
                     ', '.join(f"{' ' if x >= 0 else ''}{x:.10e}" for x in value_table[i : i + 4]) + ","
@@ -147,7 +164,16 @@ if __name__ == '__main__':
     with open(os.path.join(args.output_dir, 'lookups.h'), 'w') as f:
         f.write(lookups)
     
-    values = generate_values_h(model, args.grid_range, args.resolution)
+    cache_file = args.model_path + f'values_cache_{MAX_RESOLUTION}.json'
+    if not os.path.exists(cache_file):
+        cache = generate_values_cache(model, args.grid_range)
+        with open(cache_file, 'w') as f:
+            json.dump(cache, f)
+    else:
+        with open(cache_file, 'r') as f:
+            cache = json.load(f)
+
+    values = generate_values_h(model, args.grid_range, args.resolution, cache)
     with open(os.path.join(args.output_dir, 'values.h'), 'w') as f:
         f.write(values)
 
