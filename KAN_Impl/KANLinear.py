@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 import math
 
-def make_quantize(tp, fp):
+def make_quantize(tp, fp, quantize_clip):
 
     class Quantize(torch.autograd.Function):
 
@@ -10,11 +10,20 @@ def make_quantize(tp, fp):
         def forward(ctx, input):
 
             input = torch.round(input * (2 ** fp))
-            range_size = 2 ** tp
 
-            wrapped_unsigned_val = torch.fmod(input + range_size / 2, range_size)
+            if quantize_clip:
 
-            return (wrapped_unsigned_val - range_size / 2) / (2 ** fp)
+                res = torch.clamp(input, -1 * (2 ** (tp - 1)), (2 ** (tp - 1)) - 1)
+
+            else:
+
+                range_size = 2 ** tp
+
+                wrapped_unsigned_val = torch.fmod(input + range_size / 2, range_size)
+
+                res = (wrapped_unsigned_val - range_size / 2)
+        
+            return res / (2 ** fp)
 
         @staticmethod
         def backward(ctx, grad_output):
@@ -27,7 +36,7 @@ class Quantizer(torch.nn.Module):
         super(Quantizer, self).__init__()
         self.tp = tp
         self.fp = fp
-        self.quantize = make_quantize(tp, fp)
+        self.quantize = make_quantize(tp, fp, quantize_clip)
         self.clipping_loss = 0.0
         self.num_clipped = 0.0
         self.num_total = 0.0
@@ -43,11 +52,9 @@ class Quantizer(torch.nn.Module):
         self.num_clipped += torch.sum(x > max_val) + torch.sum(x < min_val)
         self.num_total += x.numel()
 
-        if self.quantize_clip:
+        if not self.quantize_clip:
 
-            x = torch.clamp(x, -max_val, max_val)
-
-        else:
+            # Wrap around quantization
 
             above_max = torch.maximum(x - max_val, torch.zeros_like(x) - 0.5 / (2 ** self.fp)) * (2 ** self.fp)
             below_min = torch.maximum(min_val - x, torch.zeros_like(x) - 0.5 / (2 ** self.fp)) * (2 ** self.fp)
