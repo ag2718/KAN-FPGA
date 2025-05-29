@@ -8,6 +8,11 @@ import argparse
 import shutil
 import torch.nn.functional as F
 
+import sys
+sys.path.append('/home/aarushg/KAN-FPGA/KAN_Impl')
+
+from KANLinear import KANLinear
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -18,7 +23,34 @@ BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # model = torch.load(MODEL_PATH, weights_only=False)
 
-MAX_RESOLUTION = 256
+MAX_RESOLUTION = 1024
+
+def quantize_value(x, tot_precision=16, float_precision=6):
+
+    x = round(x * (2 ** float_precision))
+    range_size = 2 ** tot_precision
+
+    unsigned_x = (x + range_size / 2) % range_size
+    signed_x = unsigned_x - range_size / 2
+
+    return signed_x / (2 ** float_precision)
+
+
+def prune_cache(cache, prune_fraction=0.1):
+
+    # Calculate norms and sort by importance
+    norms = {key: np.linalg.norm(np.array(value)) for key, value in cache.items()}
+    sorted_keys = sorted(norms.keys(), key=lambda k: norms[k])
+    
+    # Calculate number of nodes to prune based on fraction
+    num_to_prune = int(len(cache) * prune_fraction)
+    
+    # Delete lowest x fraction of nodes
+    for key in sorted_keys[:num_to_prune]:
+        del cache[key]
+
+    return cache
+
 
 def generate_defines_h(model, resolution=256, tot_precision=16, float_precision=6):
 
@@ -26,16 +58,17 @@ def generate_defines_h(model, resolution=256, tot_precision=16, float_precision=
         defines_content = f.read()
 
     defines_content = defines_content.replace("{TOT_BITS}", str(tot_precision)) \
-                                     .replace("{FBITS}", str(float_precision)) \
+                                     .replace("{IBITS}", str(tot_precision -float_precision)) \
                                      .replace("{LUT_SIZE}", str(resolution)) \
                                      .replace("{N_INPUT}", str(model.layers[0].in_features)) \
                                      .replace("{N_OUTPUT}", str(model.layers[-1].out_features))
     return defines_content
 
-def generate_lookups_h(model, grid_range):
+def generate_lookups_h(model, grid_range, cache):
     """
     Generates `lookups.h` file.
     """
+    
 
     shift_by = 1 + int(math.log(grid_range[1], 2))
 
@@ -48,6 +81,10 @@ def generate_lookups_h(model, grid_range):
     for i, layer in enumerate(model.layers):
         for j in range(layer.in_features):
             for k in range(layer.out_features):
+
+                if f"lut_{i}_{j}_{k}" not in cache:
+                    continue
+
                 lookup_func = func_template.replace("{layer}", str(i)).replace("{j}", str(j)).replace("{k}", str(k))
                 lookup_file_contents += "\n" + lookup_func + "\n"
 
@@ -72,7 +109,7 @@ def get_activation_values(model, layer_i, inp_node, out_node, grid_range=[-8, 8]
 
     return (base_output + spline_output).tolist()
 
-def generate_values_cache(model, grid_range):
+def generate_values_cache(model, grid_range, tot_precision=16, float_precision=6):
 
     cache = {}
     for i, layer in enumerate(model.layers):
@@ -83,7 +120,7 @@ def generate_values_cache(model, grid_range):
 
     return cache
 
-def generate_values_h(model, grid_range, resolution, cache):
+def generate_values_h(model, grid_range, resolution, cache, tot_precision=16, float_precision=6):
 
     with open(f"{BASE_PATH}/templates/values_header.txt", "r") as f:
         values_file_contents = f.read()
@@ -95,10 +132,13 @@ def generate_values_h(model, grid_range, resolution, cache):
         for j in range(layer.in_features):
             for k in range(layer.out_features):
 
+                if f"lut_{i}_{j}_{k}" not in cache:
+                    continue
+
                 value_table = cache[f"lut_{i}_{j}_{k}"][::MAX_RESOLUTION//resolution]
 
                 formatted_tbl = '\n'.join(
-                    ', '.join(f"{' ' if x >= 0 else ''}{x:.10e}" for x in value_table[i : i + 4]) + ","
+                    ', '.join(f"{' ' if x >= 0 else ''}(lut_t){quantize_value(x, tot_precision=tot_precision, float_precision=float_precision):.5e}" for x in value_table[i : i + 4]) + ","
                     for i in range(0, resolution, 4)
                 )[:-1]
 
@@ -118,17 +158,37 @@ def generate_kan_cpp(model):
         file_contents += "\n\t// Compute activations from LUTs\n"
         for j in range(layer.in_features):
             for k in range(layer.out_features):
+
+                if f"lut_{i}_{j}_{k}" not in cache:
+                    continue
+
                 if i == 0:
                     file_contents += f"\tlut_t act_{i}_{j}_{k} = lut_lookup_{i}_{j}_{k}(input[{j}]);\n"
                 else:
                     file_contents += f"\tlut_t act_{i}_{j}_{k} = lut_lookup_{i}_{j}_{k}(out_{i-1}_{j});\n"
 
+        # file_contents += f"\n\t// Print activation values for layer {i} to {i + 1} edges\n"
+        # for j in range(layer.in_features):
+        #     for k in range(layer.out_features):
+        #         file_contents += f"\tstd::cout << \"Layer {i} activation {j}->{k}: \" << act_{i}_{j}_{k} << std::endl;\n\n"
+
         file_contents += "\n\t// Aggregate activations to get layer outputs\n"
         for k in range(layer.out_features):
 
             sum_var = f"output[{k}]" if i == len(model.layers) - 1 else f"lut_t out_{i}_{k}"
-            sum_str = f"{sum_var} = " + " + ".join(f"act_{i}_{j}_{k}" for j in range(layer.in_features))
+
+            to_sum = [f"act_{i}_{j}_{k}" for j in range(layer.in_features) if f"lut_{i}_{j}_{k}" in cache]
+
+            sum_str = f"{sum_var} = " + (" + ".join(to_sum) if to_sum else "0")
+
             file_contents += "\t" + sum_str + ";\n"
+
+        # if i != len(model.layers) - 1:
+        #     # Print activation values for debugging
+        #     file_contents += f"\n\t// Print summed values for layer {i}:\n"
+        #     file_contents += "\tstd::cout << \"Layer " + str(i) + f" outputs: \" << " + ' << \", \" << '.join(f'out_{i}_{k}' for k in range(layer.out_features)) + " << \"\\n\";"
+        #     file_contents += "\n"
+
     
     return file_contents + "\n}"
 
@@ -140,6 +200,7 @@ if __name__ == '__main__':
     parser.add_argument('--tot_precision', type=int, default=16, help='Total bit precision')
     parser.add_argument('--float_precision', type=int, default=6, help='Floating bit precision')
     parser.add_argument('--output_dir', type=str, default='.', help='Directory to store output files')
+    parser.add_argument('--prune_fraction', type=float, default=0.8, help='Fraction of LUTs to prune')
 
     args = parser.parse_args()
 
@@ -156,22 +217,25 @@ if __name__ == '__main__':
 
     shutil.copy(os.path.join(BASE_PATH, 'templates', 'tcl.txt'), os.path.join(args.output_dir, 'KAN.tcl'))
 
-    defines = generate_defines_h(model, resolution=args.resolution, tot_precision=args.tot_precision, float_precision=args.float_precision)
-    with open(os.path.join(args.output_dir, 'defines.h'), 'w') as f:
-        f.write(defines)
-    
-    lookups = generate_lookups_h(model, args.grid_range)
-    with open(os.path.join(args.output_dir, 'lookups.h'), 'w') as f:
-        f.write(lookups)
     
     cache_file = args.model_path + f'values_cache_{MAX_RESOLUTION}.json'
     if not os.path.exists(cache_file):
-        cache = generate_values_cache(model, args.grid_range)
+        cache = generate_values_cache(model, args.grid_range, tot_precision=args.tot_precision, float_precision=args.float_precision)
         with open(cache_file, 'w') as f:
             json.dump(cache, f)
     else:
         with open(cache_file, 'r') as f:
             cache = json.load(f)
+    
+    cache = prune_cache(cache, prune_fraction=args.prune_fraction)
+
+    defines = generate_defines_h(model, resolution=args.resolution, tot_precision=args.tot_precision, float_precision=args.float_precision)
+    with open(os.path.join(args.output_dir, 'defines.h'), 'w') as f:
+        f.write(defines)
+    
+    lookups = generate_lookups_h(model, args.grid_range, cache)
+    with open(os.path.join(args.output_dir, 'lookups.h'), 'w') as f:
+        f.write(lookups)
 
     values = generate_values_h(model, args.grid_range, args.resolution, cache)
     with open(os.path.join(args.output_dir, 'values.h'), 'w') as f:

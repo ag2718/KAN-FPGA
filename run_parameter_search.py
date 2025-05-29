@@ -7,15 +7,16 @@ import itertools
 # float_precisions = [4, 6, 8]
 
 resolutions = [64, 128, 256]
-total_precisions = [6]
-float_precisions = [3]
-grid_range = [-8, 8]
+total_precisions = [4, 8, 12, 16]
+float_precisions = [2, 4, 6, 8]
+grid_range = [-4, 4]
+prune_ratios = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
 
 # Generate all combinations of parameters
-configs = list(itertools.product(resolutions, total_precisions, float_precisions))
+configs = list(itertools.product(resolutions, total_precisions, float_precisions, prune_ratios))
 
 # Run generate_and_eval.py for each configuration
-for resolution, tot_precision, float_precision in configs:
+for resolution, tot_precision, float_precision, prune_ratio in configs:
     # Skip invalid configurations where float_precision > tot_precision
     if float_precision >= tot_precision:
         continue
@@ -26,7 +27,8 @@ for resolution, tot_precision, float_precision in configs:
         "--grid_range", str(grid_range[0]), str(grid_range[1]),
         "--tot_precision", str(tot_precision),
         "--float_precision", str(float_precision),
-        "--benchmark", "hls4ml_jets"
+        "--benchmark", "hls4ml_jets",
+        "--prune_ratio", str(prune_ratio)
     ]
     
     print(f"\nRunning configuration:")

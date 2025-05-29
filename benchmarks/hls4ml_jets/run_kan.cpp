@@ -46,6 +46,11 @@ int main(int argc, char **argv)
             for (int i = 0; i < N_INPUT; i++)
             {
                 in[i] = atof(current);
+
+            // std::cout << "Input: ";
+            // std::cout << in[i] << " ";
+            // std::cout << std::endl;
+
                 current = strtok(NULL, " ");
             }
 

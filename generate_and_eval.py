@@ -1,7 +1,10 @@
 import os
 import argparse
+import sys
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+sys.path.append(BASE_DIR)
 
 parser = argparse.ArgumentParser(description="Synthesize and evaluate KAN network.")
 parser.add_argument('--benchmark', help='Benchmark on which synthesis and evaluation is being performed.')
@@ -11,6 +14,7 @@ parser.add_argument('--resolution', type=int, default=256, help='Resolution for 
 parser.add_argument('--grid_range', type=int, nargs=2, default=[-8, 8], help='Grid range as two integers (MUST BE THE SAME AS TRAIN TIME)')
 parser.add_argument('--tot_precision', type=int, default=16, help='Total bit precision')
 parser.add_argument('--float_precision', type=int, default=6, help='Floating bit precision')
+parser.add_argument('--prune_ratio', type=float, default=0.0, help='Pruning ratio')
 
 args = parser.parse_args()
 
@@ -23,7 +27,7 @@ OUTPUT_DIR = f"{BASE_DIR}/benchmarks/{args.benchmark}/firmware"
 
 
 #### GENERATE KAN CPP FILES ####
-os.system(f"python {BASE_DIR}/generate_kan_cpp/main.py --model_path {MODEL_PATH} --resolution {args.resolution} --grid_range {args.grid_range[0]} {args.grid_range[1]} --tot_precision {args.tot_precision} --float_precision {args.float_precision} --output_dir {OUTPUT_DIR}")
+os.system(f"python {BASE_DIR}/generate_kan_cpp/main.py --model_path {MODEL_PATH} --resolution {args.resolution} --grid_range {args.grid_range[0]} {args.grid_range[1]} --tot_precision {args.tot_precision} --float_precision {args.float_precision} --output_dir {OUTPUT_DIR} --prune_fraction {args.prune_ratio}")
 print(f"KAN CPP code generated at {OUTPUT_DIR}!")
 
 #################################
@@ -31,9 +35,9 @@ print(f"KAN CPP code generated at {OUTPUT_DIR}!")
 
 ### PERFORM EVAL USING BENCHMARK-SPECIFIC SCRIPT ###
 
-EXP_NAME = f"res{args.resolution}_gr{args.grid_range[0]},{args.grid_range[1]}_tp{args.tot_precision}_fp{args.float_precision}"
+EXP_NAME = f"res{args.resolution}_gr{args.grid_range[0]},{args.grid_range[1]}_tp{args.tot_precision}_fp{args.float_precision}_pr{args.prune_ratio}"
 os.system(f"python {BASE_DIR}/benchmarks/{args.benchmark}/eval.py {EXP_NAME} --header res tp fp --data {args.resolution} {args.tot_precision} {args.float_precision}")
 print(f"Results (benchmark {args.benchmark}, config {EXP_NAME})")
 print(f"------------------------------------------")
-with open(f"{BASE_DIR}/benchmarks/{args.benchmark}/logs/{EXP_NAME}.csv", 'r') as f:
+with open(f"{BASE_DIR}/benchmarks/{args.benchmark}/logs/{EXP_NAME}.txt", 'r') as f:
     print(f.read())

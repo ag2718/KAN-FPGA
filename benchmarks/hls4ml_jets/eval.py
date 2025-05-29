@@ -58,6 +58,8 @@ def main():
     header.extend(["correct", "total"])
     data.extend(map(str, [correct, y_lbl.shape[0]]))
 
+    print(header, data)
+
     # # Write to the text file
     # with open(f"{BASE_DIR}/logs/{args.exp_name}.txt", 'w') as f:
     #     f.write(f"correct,total\n{correct},{y_lbl.shape[0]}\n")
