@@ -19,7 +19,7 @@ def make_quantize(tp, fp, quantize_clip):
 
                 range_size = 2 ** tp
 
-                wrapped_unsigned_val = torch.fmod(input + range_size / 2, range_size)
+                wrapped_unsigned_val = torch.fmod(torch.fmod(input + range_size / 2, range_size) + range_size, range_size)
 
                 res = (wrapped_unsigned_val - range_size / 2)
         
