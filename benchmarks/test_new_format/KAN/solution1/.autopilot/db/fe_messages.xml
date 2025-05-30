@@ -1,0 +1,60 @@
+<xilinx:hls_fe_msgs>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="lut_0_0_3.cpp:24:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="lut_lookup_0_0_3" ARG_PragmaIsValid="1" ARG_PragmaOptions="variable=lut_0_0_3 type=RAM_1P impl=LUTRAM" ARG_PragmaType="bind_storage" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="lut_0_0_2.cpp:24:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="lut_lookup_0_0_2" ARG_PragmaIsValid="1" ARG_PragmaOptions="variable=lut_0_0_2 type=RAM_1P impl=LUTRAM" ARG_PragmaType="bind_storage" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="lut_0_0_1.cpp:24:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="lut_lookup_0_0_1" ARG_PragmaIsValid="1" ARG_PragmaOptions="variable=lut_0_0_1 type=RAM_1P impl=LUTRAM" ARG_PragmaType="bind_storage" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="lut_0_0_0.cpp:24:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="lut_lookup_0_0_0" ARG_PragmaIsValid="1" ARG_PragmaOptions="variable=lut_0_0_0 type=RAM_1P impl=LUTRAM" ARG_PragmaType="bind_storage" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="/home/aarushg/KAN-FPGA/benchmarks/test_new_format/firmware/KAN.tcl:33:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaContext="directive" ARG_PragmaFunction="KAN" ARG_PragmaIsValid="1" ARG_PragmaOptions="name=KAN" ARG_PragmaType="top" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="KAN.cpp:8:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="KAN" ARG_PragmaIsValid="1" ARG_PragmaOptions="variable = input complete" ARG_PragmaType="array_partition" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="KAN.cpp:9:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="KAN" ARG_PragmaIsValid="1" ARG_PragmaOptions="variable = output complete" ARG_PragmaType="array_partition" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="KAN.cpp:11:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="KAN" ARG_PragmaIsValid="1" ARG_PragmaOptions="mode = ap_none port = input, output" ARG_PragmaType="interface" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="KAN.cpp:12:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="KAN" ARG_PragmaIsValid="1" ARG_PragmaOptions="II = 1" ARG_PragmaType="pipeline" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_INLINE" msg_id="214-178" msg_severity="INFO" msg_loc="lut_0_0_0.cpp:23:0" msg_body="Inlining function 'value_to_index(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)' into 'lut_lookup_0_0_0(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)'">
+        <args Callee="value_to_index(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)" Callee-DebugLoc="File ./value_to_index.h Line 4 Column 0" Caller="lut_lookup_0_0_0(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)" Caller-DebugLoc="File lut_0_0_0.cpp Line 23 Column 0"/>
+    </msg>
+    <msg msg_groups="PRAGMA_INLINE" msg_id="214-178" msg_severity="INFO" msg_loc="lut_0_0_1.cpp:23:0" msg_body="Inlining function 'value_to_index(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)' into 'lut_lookup_0_0_1(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)'">
+        <args Callee="value_to_index(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)" Callee-DebugLoc="File ./value_to_index.h Line 4 Column 0" Caller="lut_lookup_0_0_1(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)" Caller-DebugLoc="File lut_0_0_1.cpp Line 23 Column 0"/>
+    </msg>
+    <msg msg_groups="PRAGMA_INLINE" msg_id="214-178" msg_severity="INFO" msg_loc="lut_0_0_2.cpp:23:0" msg_body="Inlining function 'value_to_index(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)' into 'lut_lookup_0_0_2(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)'">
+        <args Callee="value_to_index(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)" Callee-DebugLoc="File ./value_to_index.h Line 4 Column 0" Caller="lut_lookup_0_0_2(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)" Caller-DebugLoc="File lut_0_0_2.cpp Line 23 Column 0"/>
+    </msg>
+    <msg msg_groups="PRAGMA_INLINE" msg_id="214-178" msg_severity="INFO" msg_loc="lut_0_0_3.cpp:23:0" msg_body="Inlining function 'value_to_index(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)' into 'lut_lookup_0_0_3(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)'">
+        <args Callee="value_to_index(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)" Callee-DebugLoc="File ./value_to_index.h Line 4 Column 0" Caller="lut_lookup_0_0_3(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)" Caller-DebugLoc="File lut_0_0_3.cpp Line 23 Column 0"/>
+    </msg>
+    <msg msg_groups="PRAGMA_INLINE" msg_id="214-178" msg_severity="INFO" msg_loc="KAN.cpp:7:0" msg_body="Inlining function 'lut_lookup_0_0_0(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)' into 'KAN(ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*, ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*)'">
+        <args Callee="lut_lookup_0_0_0(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)" Callee-DebugLoc="File lut_0_0_0.cpp Line 23 Column 0" Caller="KAN(ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*, ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*)" Caller-DebugLoc="File KAN.cpp Line 7 Column 0"/>
+    </msg>
+    <msg msg_groups="PRAGMA_INLINE" msg_id="214-178" msg_severity="INFO" msg_loc="KAN.cpp:7:0" msg_body="Inlining function 'lut_lookup_0_0_1(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)' into 'KAN(ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*, ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*)'">
+        <args Callee="lut_lookup_0_0_1(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)" Callee-DebugLoc="File lut_0_0_1.cpp Line 23 Column 0" Caller="KAN(ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*, ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*)" Caller-DebugLoc="File KAN.cpp Line 7 Column 0"/>
+    </msg>
+    <msg msg_groups="PRAGMA_INLINE" msg_id="214-178" msg_severity="INFO" msg_loc="KAN.cpp:7:0" msg_body="Inlining function 'lut_lookup_0_0_2(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)' into 'KAN(ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*, ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*)'">
+        <args Callee="lut_lookup_0_0_2(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)" Callee-DebugLoc="File lut_0_0_2.cpp Line 23 Column 0" Caller="KAN(ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*, ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*)" Caller-DebugLoc="File KAN.cpp Line 7 Column 0"/>
+    </msg>
+    <msg msg_groups="PRAGMA_INLINE" msg_id="214-178" msg_severity="INFO" msg_loc="KAN.cpp:7:0" msg_body="Inlining function 'lut_lookup_0_0_3(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)' into 'KAN(ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*, ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*)'">
+        <args Callee="lut_lookup_0_0_3(ap_fixed&lt;8, 6, (ap_q_mode)5, (ap_o_mode)3, 0&gt;)" Callee-DebugLoc="File lut_0_0_3.cpp Line 23 Column 0" Caller="KAN(ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*, ap_fixed&lt;8, 6, (ap_q_mode)0, (ap_o_mode)0, 0&gt;*)" Caller-DebugLoc="File KAN.cpp Line 7 Column 0"/>
+    </msg>
+    <msg msg_groups="PRAGMA_MISC" msg_id="214-248" msg_severity="INFO" msg_loc="KAN.cpp:7:0" msg_body="Applying array_partition to 'input': Complete partitioning on dimension 1.">
+        <args Dim="1" Mode="Complete" UOName="input"/>
+    </msg>
+    <msg msg_groups="PRAGMA_MISC" msg_id="214-248" msg_severity="INFO" msg_loc="KAN.cpp:7:0" msg_body="Applying array_partition to 'output': Complete partitioning on dimension 1.">
+        <args Dim="1" Mode="Complete" UOName="output"/>
+    </msg>
+</xilinx:hls_fe_msgs>
+

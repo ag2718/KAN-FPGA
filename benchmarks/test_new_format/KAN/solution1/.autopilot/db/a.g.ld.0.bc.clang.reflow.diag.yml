@@ -1,0 +1,148 @@
+--- !Passed
+Pass:            reflow-inliner
+Name:            Inline
+DebugLoc:        { File: lut_0_0_0.cpp, Line: 23, Column: 0 }
+Function:        _Z16lut_lookup_0_0_08ap_fixedILi8ELi6EL9ap_q_mode5EL9ap_o_mode3ELi0EE
+Args:            
+  - String:          'Inlining function '''
+  - Callee:          'value_to_index(ap_fixed<8, 6, (ap_q_mode)5, (ap_o_mode)3, 0>)'
+    DebugLoc:        { File: ./value_to_index.h, Line: 4, Column: 0 }
+  - String:          ''' into '''
+  - Caller:          'lut_lookup_0_0_0(ap_fixed<8, 6, (ap_q_mode)5, (ap_o_mode)3, 0>)'
+    DebugLoc:        { File: lut_0_0_0.cpp, Line: 23, Column: 0 }
+  - String:          ''''
+...
+--- !Passed
+Pass:            reflow-inliner
+Name:            Inline
+DebugLoc:        { File: lut_0_0_1.cpp, Line: 23, Column: 0 }
+Function:        _Z16lut_lookup_0_0_18ap_fixedILi8ELi6EL9ap_q_mode5EL9ap_o_mode3ELi0EE
+Args:            
+  - String:          'Inlining function '''
+  - Callee:          'value_to_index(ap_fixed<8, 6, (ap_q_mode)5, (ap_o_mode)3, 0>)'
+    DebugLoc:        { File: ./value_to_index.h, Line: 4, Column: 0 }
+  - String:          ''' into '''
+  - Caller:          'lut_lookup_0_0_1(ap_fixed<8, 6, (ap_q_mode)5, (ap_o_mode)3, 0>)'
+    DebugLoc:        { File: lut_0_0_1.cpp, Line: 23, Column: 0 }
+  - String:          ''''
+...
+--- !Passed
+Pass:            reflow-inliner
+Name:            Inline
+DebugLoc:        { File: lut_0_0_2.cpp, Line: 23, Column: 0 }
+Function:        _Z16lut_lookup_0_0_28ap_fixedILi8ELi6EL9ap_q_mode5EL9ap_o_mode3ELi0EE
+Args:            
+  - String:          'Inlining function '''
+  - Callee:          'value_to_index(ap_fixed<8, 6, (ap_q_mode)5, (ap_o_mode)3, 0>)'
+    DebugLoc:        { File: ./value_to_index.h, Line: 4, Column: 0 }
+  - String:          ''' into '''
+  - Caller:          'lut_lookup_0_0_2(ap_fixed<8, 6, (ap_q_mode)5, (ap_o_mode)3, 0>)'
+    DebugLoc:        { File: lut_0_0_2.cpp, Line: 23, Column: 0 }
+  - String:          ''''
+...
+--- !Passed
+Pass:            reflow-inliner
+Name:            Inline
+DebugLoc:        { File: lut_0_0_3.cpp, Line: 23, Column: 0 }
+Function:        _Z16lut_lookup_0_0_38ap_fixedILi8ELi6EL9ap_q_mode5EL9ap_o_mode3ELi0EE
+Args:            
+  - String:          'Inlining function '''
+  - Callee:          'value_to_index(ap_fixed<8, 6, (ap_q_mode)5, (ap_o_mode)3, 0>)'
+    DebugLoc:        { File: ./value_to_index.h, Line: 4, Column: 0 }
+  - String:          ''' into '''
+  - Caller:          'lut_lookup_0_0_3(ap_fixed<8, 6, (ap_q_mode)5, (ap_o_mode)3, 0>)'
+    DebugLoc:        { File: lut_0_0_3.cpp, Line: 23, Column: 0 }
+  - String:          ''''
+...
+--- !Passed
+Pass:            reflow-inliner
+Name:            Inline
+DebugLoc:        { File: KAN.cpp, Line: 7, Column: 0 }
+Function:        _Z3KANP8ap_fixedILi8ELi6EL9ap_q_mode0EL9ap_o_mode0ELi0EES3_
+Args:            
+  - String:          'Inlining function '''
+  - Callee:          'lut_lookup_0_0_0(ap_fixed<8, 6, (ap_q_mode)5, (ap_o_mode)3, 0>)'
+    DebugLoc:        { File: lut_0_0_0.cpp, Line: 23, Column: 0 }
+  - String:          ''' into '''
+  - Caller:          'KAN(ap_fixed<8, 6, (ap_q_mode)0, (ap_o_mode)0, 0>*, ap_fixed<8, 6, (ap_q_mode)0, (ap_o_mode)0, 0>*)'
+    DebugLoc:        { File: KAN.cpp, Line: 7, Column: 0 }
+  - String:          ''''
+...
+--- !Passed
+Pass:            reflow-inliner
+Name:            Inline
+DebugLoc:        { File: KAN.cpp, Line: 7, Column: 0 }
+Function:        _Z3KANP8ap_fixedILi8ELi6EL9ap_q_mode0EL9ap_o_mode0ELi0EES3_
+Args:            
+  - String:          'Inlining function '''
+  - Callee:          'lut_lookup_0_0_1(ap_fixed<8, 6, (ap_q_mode)5, (ap_o_mode)3, 0>)'
+    DebugLoc:        { File: lut_0_0_1.cpp, Line: 23, Column: 0 }
+  - String:          ''' into '''
+  - Caller:          'KAN(ap_fixed<8, 6, (ap_q_mode)0, (ap_o_mode)0, 0>*, ap_fixed<8, 6, (ap_q_mode)0, (ap_o_mode)0, 0>*)'
+    DebugLoc:        { File: KAN.cpp, Line: 7, Column: 0 }
+  - String:          ''''
+...
+--- !Passed
+Pass:            reflow-inliner
+Name:            Inline
+DebugLoc:        { File: KAN.cpp, Line: 7, Column: 0 }
+Function:        _Z3KANP8ap_fixedILi8ELi6EL9ap_q_mode0EL9ap_o_mode0ELi0EES3_
+Args:            
+  - String:          'Inlining function '''
+  - Callee:          'lut_lookup_0_0_2(ap_fixed<8, 6, (ap_q_mode)5, (ap_o_mode)3, 0>)'
+    DebugLoc:        { File: lut_0_0_2.cpp, Line: 23, Column: 0 }
+  - String:          ''' into '''
+  - Caller:          'KAN(ap_fixed<8, 6, (ap_q_mode)0, (ap_o_mode)0, 0>*, ap_fixed<8, 6, (ap_q_mode)0, (ap_o_mode)0, 0>*)'
+    DebugLoc:        { File: KAN.cpp, Line: 7, Column: 0 }
+  - String:          ''''
+...
+--- !Passed
+Pass:            reflow-inliner
+Name:            Inline
+DebugLoc:        { File: KAN.cpp, Line: 7, Column: 0 }
+Function:        _Z3KANP8ap_fixedILi8ELi6EL9ap_q_mode0EL9ap_o_mode0ELi0EES3_
+Args:            
+  - String:          'Inlining function '''
+  - Callee:          'lut_lookup_0_0_3(ap_fixed<8, 6, (ap_q_mode)5, (ap_o_mode)3, 0>)'
+    DebugLoc:        { File: lut_0_0_3.cpp, Line: 23, Column: 0 }
+  - String:          ''' into '''
+  - Caller:          'KAN(ap_fixed<8, 6, (ap_q_mode)0, (ap_o_mode)0, 0>*, ap_fixed<8, 6, (ap_q_mode)0, (ap_o_mode)0, 0>*)'
+    DebugLoc:        { File: KAN.cpp, Line: 7, Column: 0 }
+  - String:          ''''
+...
+--- !Passed
+Pass:            reflow-array-partition
+Name:            ArrayXform
+DebugLoc:        { File: KAN.cpp, Line: 7, Column: 0 }
+Function:        _Z3KANP8ap_fixedILi8ELi6EL9ap_q_mode0EL9ap_o_mode0ELi0EES3_
+Args:            
+  - String:          'Applying '
+  - String:          array_partition
+  - String:          ' to '''
+  - UOName:          input
+  - String:          ''':'
+  - String:          ' '
+  - Mode:            Complete
+  - String:          ' partitioning'
+  - String:          ' on dimension '
+  - Dim:             '1'
+  - String:          .
+...
+--- !Passed
+Pass:            reflow-array-partition
+Name:            ArrayXform
+DebugLoc:        { File: KAN.cpp, Line: 7, Column: 0 }
+Function:        _Z3KANP8ap_fixedILi8ELi6EL9ap_q_mode0EL9ap_o_mode0ELi0EES3_
+Args:            
+  - String:          'Applying '
+  - String:          array_partition
+  - String:          ' to '''
+  - UOName:          output
+  - String:          ''':'
+  - String:          ' '
+  - Mode:            Complete
+  - String:          ' partitioning'
+  - String:          ' on dimension '
+  - Dim:             '1'
+  - String:          .
+...

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BindInfo>
+	<BindNode BINDTYPE="op" DISPLAY="bind_op xor" ID="" IMPL="auto" LATENCY="0" OPTYPE="xor" PRAGMA="" RTLNAME="xor_ln6_fu_135_p2" SOURCE="./value_to_index.h:6" VARIABLE="xor_ln6" MODULE="KAN" LOOP="" BUNDLEDNAME="" DSP="0" BRAM="0" URAM="0" USAGE="" STORAGESUBTYPE="" STORAGESIZE=""/>
+	<BindNode BINDTYPE="op" DISPLAY="bind_op add" ID="" IMPL="fabric" LATENCY="0" OPTYPE="add" PRAGMA="" RTLNAME="add_ln22_fu_171_p2" SOURCE="KAN.cpp:22" VARIABLE="add_ln22" MODULE="KAN" LOOP="" BUNDLEDNAME="" DSP="0" BRAM="0" URAM="0" USAGE="" STORAGESUBTYPE="" STORAGESIZE=""/>
+	<BindNode BINDTYPE="storage" DISPLAY="bind_storage ram_1p" ID="" IMPL="lutram" LATENCY="1" OPTYPE="ram_1p" PRAGMA="pragma" RTLNAME="lut_0_0_0_U" SOURCE="" VARIABLE="lut_0_0_0" MODULE="KAN" LOOP="" BUNDLEDNAME="" DSP="0" BRAM="0" URAM="0" USAGE="" STORAGESUBTYPE="" STORAGESIZE="4 64 1"/>
+	<BindNode BINDTYPE="storage" DISPLAY="bind_storage ram_1p" ID="" IMPL="lutram" LATENCY="1" OPTYPE="ram_1p" PRAGMA="pragma" RTLNAME="lut_0_0_1_U" SOURCE="" VARIABLE="lut_0_0_1" MODULE="KAN" LOOP="" BUNDLEDNAME="" DSP="0" BRAM="0" URAM="0" USAGE="" STORAGESUBTYPE="" STORAGESIZE="2 64 1"/>
+	<BindNode BINDTYPE="storage" DISPLAY="bind_storage ram_1p" ID="" IMPL="lutram" LATENCY="1" OPTYPE="ram_1p" PRAGMA="pragma" RTLNAME="lut_0_0_2_U" SOURCE="" VARIABLE="lut_0_0_2" MODULE="KAN" LOOP="" BUNDLEDNAME="" DSP="0" BRAM="0" URAM="0" USAGE="" STORAGESUBTYPE="" STORAGESIZE="3 64 1"/>
+	<BindNode BINDTYPE="storage" DISPLAY="bind_storage ram_1p" ID="" IMPL="lutram" LATENCY="1" OPTYPE="ram_1p" PRAGMA="pragma" RTLNAME="lut_0_0_3_U" SOURCE="" VARIABLE="lut_0_0_3" MODULE="KAN" LOOP="" BUNDLEDNAME="" DSP="0" BRAM="0" URAM="0" USAGE="" STORAGESUBTYPE="" STORAGESIZE="2 64 1"/>
+</BindInfo>

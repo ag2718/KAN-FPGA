@@ -1,0 +1,54 @@
+---
+MainSourceFile:  /home/aarushg/KAN-FPGA/benchmarks/test_new_format/firmware/KAN/solution1/.autopilot/db/lut_0_0_0.pp.0.cpp
+Diagnostics:     
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_1223_1:  '
+    FileOffset:      1223
+    FilePath:        /opt/Xilinx/Vitis_HLS/2024.1/common/technology/autopilot/etc/ap_int_base.h
+    Replacements:    
+      - FilePath:        /home/aarushg/KAN-FPGA/benchmarks/test_new_format/firmware/KAN/solution1/.autopilot/db/lut_0_0_0.pp.0.cpp
+        Offset:          55210
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_1223_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_676_1:  '
+    FileOffset:      676
+    FilePath:        /opt/Xilinx/Vitis_HLS/2024.1/common/technology/autopilot/etc/ap_int_ref.h
+    Replacements:    
+      - FilePath:        /home/aarushg/KAN-FPGA/benchmarks/test_new_format/firmware/KAN/solution1/.autopilot/db/lut_0_0_0.pp.0.cpp
+        Offset:          282604
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_676_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_690_1:  '
+    FileOffset:      690
+    FilePath:        /opt/Xilinx/Vitis_HLS/2024.1/common/technology/autopilot/etc/ap_int_ref.h
+    Replacements:    
+      - FilePath:        /home/aarushg/KAN-FPGA/benchmarks/test_new_format/firmware/KAN/solution1/.autopilot/db/lut_0_0_0.pp.0.cpp
+        Offset:          283068
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_690_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_704_1:  '
+    FileOffset:      704
+    FilePath:        /opt/Xilinx/Vitis_HLS/2024.1/common/technology/autopilot/etc/ap_int_ref.h
+    Replacements:    
+      - FilePath:        /home/aarushg/KAN-FPGA/benchmarks/test_new_format/firmware/KAN/solution1/.autopilot/db/lut_0_0_0.pp.0.cpp
+        Offset:          283533
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_704_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_1247_1:  '
+    FileOffset:      1247
+    FilePath:        /opt/Xilinx/Vitis_HLS/2024.1/common/technology/autopilot/etc/ap_fixed_base.h
+    Replacements:    
+      - FilePath:        /home/aarushg/KAN-FPGA/benchmarks/test_new_format/firmware/KAN/solution1/.autopilot/db/lut_0_0_0.pp.0.cpp
+        Offset:          566888
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_1247_1: '
+  - DiagnosticName:  clang-diagnostic-error
+    Message:         'Invalid Directive: for current device, RAM_1P + LUTRAM is invalid combination for BIND_STORAGE''s option ''type + impl'''
+    FileOffset:      24
+    FilePath:        lut_0_0_0.cpp
+    Replacements:    
+...
