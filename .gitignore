@@ -170,4 +170,4 @@ cython_debug/
 *.csv
 *.json
 **/firmware/**
-**/logs/**
+*.dat

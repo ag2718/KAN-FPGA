@@ -6,11 +6,14 @@ import itertools
 # total_precisions = [8, 12, 16]  
 # float_precisions = [4, 6, 8]
 
-resolutions = [64, 128, 256]
-total_precisions = [4, 8, 12, 16]
-float_precisions = [2, 4, 6, 8]
 grid_range = [-4, 4]
-prune_ratios = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+
+resolutions = [64, 128, 256]
+#total_precisions = [4, 6, 8, 10, 12]
+total_precisions = [7]
+float_precisions = [3]
+# float_precisions = [2, 3, 4, 5, 6]
+prune_ratios = [0.0, 0.2, 0.4, 0.6, 0.8]
 
 # Generate all combinations of parameters
 configs = list(itertools.product(resolutions, total_precisions, float_precisions, prune_ratios))
@@ -35,6 +38,7 @@ for resolution, tot_precision, float_precision, prune_ratio in configs:
     print(f"Resolution: {resolution}")
     print(f"Total precision: {tot_precision}")
     print(f"Float precision: {float_precision}")
+    print(f"Prune ratio: {prune_ratio}")
     
     try:
         subprocess.run(cmd)

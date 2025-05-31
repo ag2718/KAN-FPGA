@@ -36,7 +36,7 @@ print(f"KAN CPP code generated at {OUTPUT_DIR}!")
 ### PERFORM EVAL USING BENCHMARK-SPECIFIC SCRIPT ###
 
 EXP_NAME = f"res{args.resolution}_gr{args.grid_range[0]},{args.grid_range[1]}_tp{args.tot_precision}_fp{args.float_precision}_pr{args.prune_ratio}"
-os.system(f"python {BASE_DIR}/benchmarks/{args.benchmark}/eval.py {EXP_NAME} --header res tp fp --data {args.resolution} {args.tot_precision} {args.float_precision}")
+os.system(f"python {BASE_DIR}/benchmarks/{args.benchmark}/eval.py {EXP_NAME} --header res tp fp pr --data {args.resolution} {args.tot_precision} {args.float_precision} {args.prune_ratio}")
 print(f"Results (benchmark {args.benchmark}, config {EXP_NAME})")
 print(f"------------------------------------------")
 with open(f"{BASE_DIR}/benchmarks/{args.benchmark}/logs/{EXP_NAME}.txt", 'r') as f:

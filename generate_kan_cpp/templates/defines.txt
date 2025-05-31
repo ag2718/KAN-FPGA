@@ -15,7 +15,7 @@ typedef ap_fixed<{TOT_BITS},{IBITS},AP_RND,AP_SAT> input_t;
 typedef ap_fixed<{TOT_BITS},{IBITS},AP_RND,AP_SAT> result_t;
 
 // LUT related
-typedef ap_fixed<{TOT_BITS},{IBITS},AP_RND,AP_SAT> lut_t;
-typedef ap_fixed<{TOT_BITS},{IBITS},AP_RND,AP_SAT> lut_input_t;
+typedef ap_fixed<{TOT_BITS},{IBITS}> lut_t;
+typedef ap_fixed<{TOT_BITS},{IBITS}> lut_input_t;
 
 #endif

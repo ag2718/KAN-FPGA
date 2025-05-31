@@ -31,10 +31,11 @@ def main():
 
     x_test = np.load(f"{BASE_DIR}/data/X_test.npy")
 
-    with open(f"{BASE_DIR}/tb_inputs.dat", 'w') as f:
-        for row in x_test:
-            row_str = ' '.join(map(str, row))
-            f.write(row_str + '\n')
+    if not os.path.exists(f"{BASE_DIR}/tb_inputs.dat"):
+        with open(f"{BASE_DIR}/tb_inputs.dat", 'w') as f:
+            for row in x_test:
+                row_str = ' '.join(map(str, row))
+                f.write(row_str + '\n')
 
     # Compile and run CPP code
 
@@ -50,7 +51,7 @@ def main():
     # Count matching argmax indices
     correct = np.sum(np.argmax(y_lbl, axis=1) == np.argmax(y_pred, axis=1))
 
-    os.system(f"rm {BASE_DIR}/tb_inputs.dat {BASE_DIR}/tb_kan_outputs.dat")
+    os.system(f"{BASE_DIR}/tb_kan_outputs.dat")
 
     header = args.header
     data = args.data
