@@ -1,2 +1,0 @@
-res,tp,fp,correct,total,Modules&Loops,Slack,Latency(cycles),Latency(ns),Interval,Pipelined,FF,LUT
-128,12,6,122831,166000,KAN,0.03,8,24.000,1,yes,2283,4303

@@ -15,6 +15,7 @@ parser.add_argument('--grid_range', type=int, nargs=2, default=[-8, 8], help='Gr
 parser.add_argument('--tot_precision', type=int, default=16, help='Total bit precision')
 parser.add_argument('--float_precision', type=int, default=6, help='Floating bit precision')
 parser.add_argument('--prune_ratio', type=float, default=0.0, help='Pruning ratio')
+parser.add_argument('--exp_name', type=str, default=None, help='Experiment name')
 
 args = parser.parse_args()
 
@@ -35,7 +36,8 @@ print(f"KAN CPP code generated at {OUTPUT_DIR}!")
 
 ### PERFORM EVAL USING BENCHMARK-SPECIFIC SCRIPT ###
 
-EXP_NAME = f"res{args.resolution}_gr{args.grid_range[0]},{args.grid_range[1]}_tp{args.tot_precision}_fp{args.float_precision}_pr{args.prune_ratio}"
+EXP_NAME = (args.exp_name if args.exp_name is not None else "") + f"res{args.resolution}_gr{args.grid_range[0]},{args.grid_range[1]}_tp{args.tot_precision}_fp{args.float_precision}_pr{args.prune_ratio}"
+
 os.system(f"python {BASE_DIR}/benchmarks/{args.benchmark}/eval.py {EXP_NAME} --header res tp fp pr --data {args.resolution} {args.tot_precision} {args.float_precision} {args.prune_ratio}")
 print(f"Results (benchmark {args.benchmark}, config {EXP_NAME})")
 print(f"------------------------------------------")

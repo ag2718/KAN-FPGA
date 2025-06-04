@@ -11,8 +11,8 @@
 #define LUT_SIZE {LUT_SIZE}
 
 // Model related
-typedef ap_fixed<{TOT_BITS},{IBITS},AP_RND,AP_SAT> input_t;
-typedef ap_fixed<{TOT_BITS},{IBITS},AP_RND,AP_SAT> result_t;
+typedef ap_fixed<{TOT_BITS},{IBITS}> input_t;
+typedef ap_fixed<{TOT_BITS},{IBITS}> result_t;
 
 // LUT related
 typedef ap_fixed<{TOT_BITS},{IBITS}> lut_t;

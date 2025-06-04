@@ -1,0 +1,18 @@
+#pragma once
+
+#include <ap_int.h>
+#include <ap_fixed.h>
+#include <hls_stream.h>
+
+#define N_INPUT {N_INPUT}
+#define N_OUTPUT {N_OUTPUT}
+
+#define LUT_SIZE {LUT_SIZE}
+
+// Model related
+typedef ap_fixed<{TOT_BITS},{IBITS},AP_RND,AP_SAT> input_t;
+typedef ap_fixed<{TOT_BITS},{IBITS},AP_RND,AP_SAT> result_t;
+
+// LUT related
+typedef ap_fixed<{TOT_BITS},{IBITS},AP_RND,AP_SAT> lut_t;
+typedef ap_fixed<{TOT_BITS},{IBITS},AP_RND,AP_SAT> lut_input_t;

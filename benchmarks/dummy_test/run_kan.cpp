@@ -47,6 +47,10 @@ int main(int argc, char **argv)
             {
                 in[i] = atof(current);
 
+            // std::cout << "Input: ";
+            // std::cout << in[i] << " ";
+            // std::cout << std::endl;
+
                 current = strtok(NULL, " ");
             }
 
@@ -63,10 +67,8 @@ int main(int argc, char **argv)
             e++;
 
             // hls-fpga-machine-learning insert tb-output
-
         }
         fin.close();
-
     }
     else
     {

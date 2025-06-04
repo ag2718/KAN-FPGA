@@ -27,7 +27,7 @@ MAX_RESOLUTION = 1024
 
 def quantize_value(x, tot_precision=16, float_precision=6):
 
-    x = float(np.floor(x * (2 ** float_precision)))
+    x = round(x * (2 ** float_precision))
     range_size = 2 ** tot_precision
 
     unsigned_x = (x + range_size / 2) % range_size
@@ -36,8 +36,9 @@ def quantize_value(x, tot_precision=16, float_precision=6):
     return signed_x / (2 ** float_precision)
 
 
-def prune_cache(cache, args):
-    prune_fraction = args.prune_fraction
+def prune_cache(cache, prune_fraction=0.1):
+
+    # Calculate norms and sort by importance
     norms = {key: np.linalg.norm(np.array(value)) for key, value in cache.items()}
     sorted_keys = sorted(norms.keys(), key=lambda k: norms[k])
     
@@ -47,111 +48,119 @@ def prune_cache(cache, args):
     # Delete lowest x fraction of nodes
     for key in sorted_keys[:num_to_prune]:
         del cache[key]
-    
-    for key in sorted_keys[num_to_prune:]:
-        if np.linalg.norm(np.array(cache[key])) < 1e-12:
-            del cache[key]
 
     return cache
 
 
 def generate_defines_h(model, args):
-    resolution = args.resolution
-    tot_precision = args.tot_precision
-    float_precision = args.float_precision
+
     with open(f"{BASE_PATH}/templates/defines.txt", "r") as f:
         defines_content = f.read()
-    defines_content = defines_content.replace("{TOT_BITS}", str(tot_precision)) \
-                                     .replace("{IBITS}", str(tot_precision - float_precision)) \
-                                     .replace("{LUT_SIZE}", str(resolution)) \
+
+    defines_content = defines_content.replace("{TOT_BITS}", str(args.tot_precision)) \
+                                     .replace("{IBITS}", str(args.tot_precision - args.float_precision)) \
+                                     .replace("{LUT_SIZE}", str(args.resolution)) \
                                      .replace("{N_INPUT}", str(model.layers[0].in_features)) \
                                      .replace("{N_OUTPUT}", str(model.layers[-1].out_features))
     return defines_content
 
-def generate_lookups_h(model, args, cache):
 
-    grid_range = args.grid_range
+def generate_values_to_index(model, args):
 
-    assert grid_range[0] == -grid_range[1]
+    shift_by = 1 + int(math.log(args.grid_range[1], 2))
 
-    shift_by = 1 + int(math.log2(grid_range[1]))
-
-    with open(f"{BASE_PATH}/templates/lookups_header.txt", "r") as f:
-        lookup_file_contents = f.read().replace("{SHIFT_FACTOR}", str(shift_by)).replace("{LUT_SIZE}", str(args.resolution))
-
-    with open(f"{BASE_PATH}/templates/lookup_func_template.txt", "r") as f:
-        func_template = f.read()
+    with open(f"{BASE_PATH}/templates/lookup_header.txt", "r") as f:
+        file_contents = f.read().replace("{ZERO_PT}", str(args.grid_range[1])).replace("{SHIFT_FACTOR}", str(shift_by))
     
-    for i, layer in enumerate(model.layers):
-        for j in range(layer.in_features):
-            for k in range(layer.out_features):
-
-                if f"lut_{i}_{j}_{k}" not in cache:
-                    continue
-
-                lookup_func = func_template.replace("{layer}", str(i)).replace("{j}", str(j)).replace("{k}", str(k))
-                lookup_file_contents += "\n" + lookup_func + "\n"
-
-    return lookup_file_contents + "\n#endif"
+    return file_contents
 
 def get_activation_values(model, layer_i, inp_node, out_node, args):
-    grid_range = args.grid_range
-    resolution = MAX_RESOLUTION
+    """
+    For the ith layer in the model, get the lookup table values for activation on edge from inp_node to out_node.
+    """
 
     layer = model.layers[layer_i]
-    array = np.linspace(grid_range[0], grid_range[1], resolution)
-    stacked_array = np.hstack([[array]*layer.in_features]).T
 
+    # Create dummy input
+    array = np.linspace(args.grid_range[0], args.grid_range[1], args.resolution)
+    stacked_array = np.hstack([[array]*layer.in_features]).T
     x = torch.from_numpy(stacked_array).float().to(device)
-    base_output = layer.base_activation(x)[:, inp_node] * layer.base_weight[out_node, inp_node]
+
+    #Loop through each activation function
+    base_output = layer.base_activation(x)[: , inp_node] * layer.base_weight[out_node, inp_node]
+
     spline_output = F.linear(layer.b_splines(x)[:, inp_node, :], layer.scaled_spline_weight[out_node, inp_node, :])
 
     return (layer.spline_selector[out_node, inp_node] * (base_output + spline_output)).tolist()
 
 def generate_values_cache(model, args):
-    grid_range = args.grid_range
-    tot_precision = args.tot_precision
-    float_precision = args.float_precision
+
     cache = {}
     for i, layer in enumerate(model.layers):
         for j in range(layer.in_features):
             for k in range(layer.out_features):
                 print(f"Processing lut_{i}_{j}_{k}...")
                 cache[f"lut_{i}_{j}_{k}"] = get_activation_values(model, i, j, k, args)
+
     return cache
 
-def generate_values_h(model, args, cache):
-    resolution = args.resolution
-    tot_precision = args.tot_precision
-    float_precision = args.float_precision
-    with open(f"{BASE_PATH}/templates/values_header.txt", "r") as f:
-        values_file_contents = f.read()
+def generate_lookup_header_and_cpp(model, args, cache, i, j, k):
 
-    assert resolution <= MAX_RESOLUTION
-    assert MAX_RESOLUTION % resolution == 0
-    
+    if f"lut_{i}_{j}_{k}" not in cache:
+        raise ValueError(f"lut_{i}_{j}_{k} not found in cache")
+
+    with open(f"{BASE_PATH}/templates/lookup_header.txt", "r") as f:
+        lookup_header_contents = f.read()
+
+    with open(f"{BASE_PATH}/templates/lookup_cpp.txt", "r") as f:
+        lookup_cpp_contents = f.read()
+
+    lookup_header_contents = lookup_header_contents.replace("{i}", str(i)).replace("{j}", str(j)).replace("{k}", str(k))
+    lookup_cpp_contents = lookup_cpp_contents.replace("{i}", str(i)).replace("{j}", str(j)).replace("{k}", str(k))
+
+    value_table = cache[f"lut_{i}_{j}_{k}"][::MAX_RESOLUTION//args.resolution]
+
+    formatted_tbl = '\n'.join(
+        ', '.join(f"{' ' if x >= 0 else ''}(lut_t){quantize_value(x, tot_precision=args.tot_precision, float_precision=args.float_precision):.5e}" for x in value_table[i : i + 4]) + ","
+        for i in range(0, args.resolution, 4)
+    )[:-1] 
+
+    lookup_cpp_contents = lookup_cpp_contents.replace("{FORMATTED_VALUES}", formatted_tbl)
+
+    return lookup_header_contents, lookup_cpp_contents
+
+def generate_all_lookups(model, args, cache):
+
+    file_dict = {}
+
     for i, layer in enumerate(model.layers):
         for j in range(layer.in_features):
             for k in range(layer.out_features):
-
                 if f"lut_{i}_{j}_{k}" not in cache:
                     continue
 
-                value_table = [quantize_value(x, tot_precision=tot_precision, float_precision=float_precision) for x in cache[f"lut_{i}_{j}_{k}"][::MAX_RESOLUTION//resolution]]
+                lookup_header_contents, lookup_cpp_contents = generate_lookup_header_and_cpp(model, args, cache, i, j, k)
 
-                formatted_tbl = '\n'.join(
-                    ', '.join(f"{' ' if x >= 0 else ''}(lut_t){x:.5e}" for x in value_table[i : i + 4]) + ","
-                    for i in range(0, resolution, 4)
-                )[:-1]
+                file_dict[f"lut_{i}_{j}_{k}.h"] = lookup_header_contents
+                file_dict[f"lut_{i}_{j}_{k}.cpp"] = lookup_cpp_contents
 
-                values_file_contents += f"\nconst lut_t lut_{i}_{j}_{k}[LUT_SIZE] {{ \n {formatted_tbl} \n }};\n"
+    return file_dict
 
-    return values_file_contents + "\n#endif"
+
 
 def generate_kan_cpp(model, cache):
 
+    file_contents = ""
+    for i, layer in enumerate(model.layers):
+        for j in range(layer.in_features):
+            for k in range(layer.out_features):
+                if f"lut_{i}_{j}_{k}" in cache:
+                    file_contents += f"#include \"lut_{i}_{j}_{k}.h\"\n"
+    
+    file_contents += "\n"
+
     with open(f"{BASE_PATH}/templates/kan_header.txt", "r") as f:
-        file_contents = f.read()
+        file_contents += f.read() + "\n"
 
     for i, layer in enumerate(model.layers):
 
@@ -169,17 +178,10 @@ def generate_kan_cpp(model, cache):
                 else:
                     file_contents += f"\tlut_t act_{i}_{j}_{k} = lut_lookup_{i}_{j}_{k}(out_{i-1}_{j});\n"
 
-        # file_contents += f"\n\t// Print activation values for layer {i} to {i + 1} edges in grid format\n"
-        # file_contents += "\tstd::cout << \"Layer " + str(i) + " activations:\\n\";\n"
-        
-        # for k in range(layer.out_features):
-        #     for j in range(layer.in_features):
-
-        #         val = f"act_{i}_{j}_{k}" if f"lut_{i}_{j}_{k}" in cache else '"-"'
-        #         file_contents += f"\tstd::cout << {val} << \",\";\n"
-
-        #     file_contents += "\tstd::cout << \"\\n\";\n"
-
+        # file_contents += f"\n\t// Print activation values for layer {i} to {i + 1} edges\n"
+        # for j in range(layer.in_features):
+        #     for k in range(layer.out_features):
+        #         file_contents += f"\tstd::cout << \"Layer {i} activation {j}->{k}: \" << act_{i}_{j}_{k} << std::endl;\n\n"
 
         file_contents += "\n\t// Aggregate activations to get layer outputs\n"
         for k in range(layer.out_features):
@@ -196,10 +198,6 @@ def generate_kan_cpp(model, cache):
         #     # Print activation values for debugging
         #     file_contents += f"\n\t// Print summed values for layer {i}:\n"
         #     file_contents += "\tstd::cout << \"Layer " + str(i) + f" outputs: \" << " + ' << \", \" << '.join(f'out_{i}_{k}' for k in range(layer.out_features)) + " << \"\\n\";"
-        #     file_contents += "\n"
-        # else:
-        #     file_contents += "\n\t// Print final output\n"
-        #     file_contents += "\tstd::cout << \"Final output: \" << " + ' << \", \" << '.join(f'output[{k}]' for k in range(layer.out_features)) + " << \"\\n\";"
         #     file_contents += "\n"
 
     
@@ -229,29 +227,30 @@ if __name__ == '__main__':
         os.makedirs(args.output_dir)
 
     shutil.copy(os.path.join(BASE_PATH, 'templates', 'tcl.txt'), os.path.join(args.output_dir, 'KAN.tcl'))
-
     
     cache_file = args.model_path + f'values_cache_{MAX_RESOLUTION}.json'
     if not os.path.exists(cache_file):
-        cache = generate_values_cache(model, args)
+        cache = generate_values_cache(model, args.grid_range, tot_precision=args.tot_precision, float_precision=args.float_precision)
         with open(cache_file, 'w') as f:
             json.dump(cache, f)
     else:
         with open(cache_file, 'r') as f:
             cache = json.load(f)
+    
+    cache = prune_cache(cache, prune_fraction=args.prune_fraction)
 
-    cache = prune_cache(cache, args)
     defines = generate_defines_h(model, args)
     with open(os.path.join(args.output_dir, 'defines.h'), 'w') as f:
         f.write(defines)
-
-    lookups = generate_lookups_h(model, args, cache)
-    with open(os.path.join(args.output_dir, 'lookups.h'), 'w') as f:
-        f.write(lookups)
-
-    values = generate_values_h(model, args, cache)
-    with open(os.path.join(args.output_dir, 'values.h'), 'w') as f:
-        f.write(values)
+    
+    values_to_index = generate_values_to_index(model, args)
+    with open(os.path.join(args.output_dir, 'values_to_index.h'), 'w') as f:
+        f.write(values_to_index)
+    
+    lookup_files = generate_all_lookups(model, args, cache)
+    for file_name, file_contents in lookup_files.items():
+        with open(os.path.join(args.output_dir, file_name), 'w') as f:
+            f.write(file_contents)
 
     kan_cpp = generate_kan_cpp(model, cache)
     with open(os.path.join(args.output_dir, 'KAN.cpp'), 'w') as f:

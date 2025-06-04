@@ -9,7 +9,7 @@ def make_quantize(tp, fp, quantize_clip):
         @staticmethod
         def forward(ctx, input):
 
-            input = torch.round(input * (2 ** fp))
+            input = torch.floor(input * (2 ** fp))
 
             if quantize_clip:
 
@@ -64,6 +64,7 @@ class Quantizer(torch.nn.Module):
             self.clipping_loss += torch.nn.functional.relu(outside_range + 0.5).mean(-1).sum()
 
         x = self.quantize.apply(x)
+
         return x
 
 
@@ -108,10 +109,16 @@ class KANLinear(torch.nn.Module):
         self.spline_weight = torch.nn.Parameter(
             torch.Tensor(out_features, in_features, grid_size + spline_order)
         )
+
+
         if enable_standalone_scale_spline:
             self.spline_scaler = torch.nn.Parameter(
                 torch.Tensor(out_features, in_features)
             )
+        
+        # Multiplied by spline weights to eliminate pruned splines
+        self.spline_selector = torch.nn.Parameter(torch.ones(out_features, in_features))
+        self.spline_selector.requires_grad = False
 
         self.scale_noise = scale_noise
         self.scale_base = scale_base
@@ -236,50 +243,59 @@ class KANLinear(torch.nn.Module):
         )
 
     def forward(self, x: torch.Tensor):
+
         assert x.size(-1) == self.in_features
         original_shape = x.shape
         x = x.reshape(-1, self.in_features)
 
         if self.quantize:
             x = self.lut_inp_quantizer(x)
-
-        base_output = F.linear(self.base_activation(x), self.base_weight)
         
-        # # Get spline basis values for each input
-        # spline_bases = self.b_splines(x)  # (batch, in_features, grid_size + spline_order)
+        base_output = self.base_activation(x).unsqueeze(2) * self.base_weight.T.unsqueeze(0)
+
+        spline_output = (base_output + torch.sum(self.b_splines(x).unsqueeze(2) * self.scaled_spline_weight.transpose(0, 1).unsqueeze(0), dim=-1)).transpose(-1, -2)
+
+        spline_output = self.spline_selector.unsqueeze(0) * spline_output
+
+        if self.quantize:
+            spline_output = self.lut_out_quantizer(spline_output)
         
-        # # Initialize output tensor for spline contribution
-        # spline_output = self.lut_out_quantizer(base_output)
-
-        # # For each input->output edge, calculate spline value and accumulate
-        # for out_idx in range(self.out_features):
-        #     for in_idx in range(self.in_features):
-        #         # Get spline coefficients for this edge
-        #         edge_coeffs = self.scaled_spline_weight[out_idx, in_idx]  # (grid_size + spline_order)
-        #         # Calculate spline value for this edge
-        #         edge_splines = self.lut_out_quantizer(torch.matmul(spline_bases[:, in_idx], edge_coeffs))  # (batch)
-        #         # Add to corresponding output node
-        #         spline_output[:, out_idx] = self.lut_out_quantizer(edge_splines +)
-        #         if self.verbose:
-        #             print(f"Edge {in_idx} -> {out_idx} spline value: {edge_splines}")
-    
-        spline_output = F.linear(
-            self.b_splines(x).view(x.size(0), -1),
-            self.scaled_spline_weight.view(self.out_features, -1),
-        )
-
-        # print("b_splines(x).shape: ", self.b_splines(x).shape)
-        # print("b_splines(x).view(x.size(0), -1).shape: ", self.b_splines(x).view(x.size(0), -1).shape)
-        # print("scaled_spline_weight.view(self.out_features, -1).shape: ", self.scaled_spline_weight.view(self.out_features, -1).shape)
-        # print("spline_output.shape: ", spline_output.shape)
-
-        output = base_output + spline_output
+        output = torch.sum(spline_output, dim=-1)
 
         if self.quantize:
             output = self.lut_out_quantizer(output)
 
         output = output.reshape(*original_shape[:-1], self.out_features)
         return output
+    
+    def prune_below_threshold(self, threshold=0.01):
+
+        # Get L2 norm of each spline between input and output nodes
+
+        grid_range = [self.grid[0, 0].item(), self.grid[0, -1].item()]
+        array = torch.linspace(grid_range[0], grid_range[1], 1024, device=self.base_weight.device)
+        stacked_array = array.unsqueeze(1).expand(-1, self.in_features)
+        x = stacked_array.float()
+
+        spline_bases = self.b_splines(x)
+        
+        norms = torch.zeros((self.out_features, self.in_features), device=self.base_weight.device)
+        for out_idx in range(self.out_features):
+            for in_idx in range(self.in_features):
+                spline_output = F.linear(spline_bases[:, in_idx, :], 
+                                      self.scaled_spline_weight[out_idx, in_idx, :])
+                norms[out_idx, in_idx] = self.spline_selector[out_idx, in_idx] * torch.norm(spline_output)
+
+        #########################################################
+
+        prior_fraction = self.spline_selector.sum() / self.spline_selector.numel() * 100
+        self.spline_selector *= (norms > threshold).float()
+        new_fraction = self.spline_selector.sum() / self.spline_selector.numel() * 100
+        print(f"Pruned {prior_fraction - new_fraction:.2f}% splines, overall remaining {new_fraction:.2f}%")
+
+        print("Spline selector after pruning:", self.spline_selector)
+        
+        return new_fraction
 
     @torch.no_grad()
     def update_grid(self, x: torch.Tensor, margin=0.01):
@@ -426,3 +442,9 @@ class KAN(torch.nn.Module):
             layer.regularization_loss(regularize_activation, regularize_entropy, regularize_clipping)
             for layer in self.layers
         )
+    
+    def prune_below_threshold(self, threshold=0.01):
+        return [
+            layer.prune_below_threshold(threshold)
+            for layer in self.layers
+        ]

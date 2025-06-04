@@ -1,1 +1,1 @@
-from .KAN_Impl import KANConv, KANLinear, KAN
+from .KAN_Impl import KAN
