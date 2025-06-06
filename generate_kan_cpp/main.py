@@ -230,7 +230,6 @@ if __name__ == '__main__':
 
     shutil.copy(os.path.join(BASE_PATH, 'templates', 'tcl.txt'), os.path.join(args.output_dir, 'KAN.tcl'))
     shutil.copy(os.path.join(BASE_PATH, 'templates', 'vivado_tcl.txt'), os.path.join(args.output_dir, 'vivado_synth.tcl'))
-
     
     cache_file = args.model_path + f'values_cache_{MAX_RESOLUTION}.json'
     if not os.path.exists(cache_file):

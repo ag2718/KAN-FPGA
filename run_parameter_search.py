@@ -1,44 +1,49 @@
 import subprocess
 import itertools
+import os
+import re
 
-# Parameter ranges to search
-# resolutions = [32, 64, 128, 256, 512]
-# total_precisions = [8, 12, 16]  
-# float_precisions = [4, 6, 8]
+BENCHMARK = "hls4ml_jets"
+MODELS_DIR = "/home/aarushg/KAN-FPGA/benchmarks/hls4ml_jets/models"
 
-grid_range = [-4, 4]
+model_files = os.listdir(MODELS_DIR)
 
-resolutions = [64, 128, 256]
-#total_precisions = [4, 6, 8, 10, 12]
-total_precisions = [7]
-float_precisions = [3]
-# float_precisions = [2, 3, 4, 5, 6]
-prune_ratios = [0.0, 0.2, 0.4, 0.6, 0.8]
-
-# Generate all combinations of parameters
-configs = list(itertools.product(resolutions, total_precisions, float_precisions, prune_ratios))
+# Extract parameters from filenames using regex
+pattern = re.compile(r'model(.*)_(\d+)t(\d+)f_pr([\d.]+)\.pth')
+extracted_params = []
+for filename in model_files:
+    match = pattern.match(filename)
+    if match:
+        exp_name, tot_precision, float_precision, prune_ratio = match.groups()
+        tot_precision, float_precision = int(tot_precision), int(float_precision)
+        prune_ratio = float(prune_ratio)
+        extracted_params.append((exp_name, tot_precision, float_precision, prune_ratio))
 
 # Run generate_and_eval.py for each configuration
-for resolution, tot_precision, float_precision, prune_ratio in configs:
-    # Skip invalid configurations where float_precision > tot_precision
-    if float_precision >= tot_precision:
-        continue
-        
+for (exp_name, tot_precision, float_precision, prune_ratio) in extracted_params:
+
+    resolution = 2**tot_precision
+    int_precision = tot_precision - float_precision
+    grid_range = [-2**(int_precision - 1), 2**(int_precision - 1)]
+
     cmd = [
         "python", "generate_and_eval.py",
         "--resolution", str(resolution),
         "--grid_range", str(grid_range[0]), str(grid_range[1]),
         "--tot_precision", str(tot_precision),
         "--float_precision", str(float_precision),
-        "--benchmark", "hls4ml_jets",
-        "--prune_ratio", str(prune_ratio)
+        "--benchmark", BENCHMARK,
+        "--model_path", f"{MODELS_DIR}/model{exp_name}_{tot_precision}t{float_precision}f_pr{prune_ratio}.pth",
+        "--exp_name", exp_name,
+        "--prune_ratio", str(1 - prune_ratio)
     ]
     
     print(f"\nRunning configuration:")
+    print(f"Experiment name: {exp_name}")
     print(f"Resolution: {resolution}")
     print(f"Total precision: {tot_precision}")
     print(f"Float precision: {float_precision}")
-    print(f"Prune ratio: {prune_ratio}")
+    print(f"Prune ratio: {1 - prune_ratio}")
     
     try:
         subprocess.run(cmd)

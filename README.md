@@ -31,7 +31,7 @@ python generate_and_eval.py --benchmark <benchmark_name> [--model_path <path/to/
 
 #### **Example:**
 ```sh
-python generate_and_eval.py --benchmark anomaly_detection --resolution 128 --grid_range -8 8 --tot_precision 12 --float_precision 6 --prune_ratio 0.2
+python generate_and_eval.py --benchmark --model_path {MODEL_PATH} anomaly_detection --resolution 128 --grid_range -8 8 --tot_precision 12 --float_precision 6 --prune_ratio 0.2
 ```
 
 ---
@@ -39,7 +39,7 @@ python generate_and_eval.py --benchmark anomaly_detection --resolution 128 --gri
 ### 2. Parameter Search
 
 Use `run_parameter_search.py` to:
-- Sweep over multiple combinations of resolution, precision, and pruning parameters
+- Sweep over all combinations of total precision, float precision, and pruning ratio for which models are trained (specified by some model directory, where model names should be in a specific format)
 - Automatically run synthesis and evaluation for each configuration
 
 #### **Usage:**

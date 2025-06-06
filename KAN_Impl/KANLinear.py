@@ -137,7 +137,7 @@ class KANLinear(torch.nn.Module):
         self.quantize = quantize
 
         lut_tp = int(math.log2(lut_res))
-        lut_fp = lut_tp - int(math.log2(grid_range[1] - grid_range[0])) - 1
+        lut_fp = lut_tp - int(math.log2(grid_range[1] - grid_range[0]))
 
 
         print("TP: ", tp, "FP: ", fp)
@@ -503,4 +503,4 @@ class KAN(torch.nn.Module):
             layer.prune_below_threshold(threshold, self.layers[i+1].spline_selector if i < len(self.layers) - 1 else None)
             total_nodes += layer.spline_selector.numel()
             total_remaining += layer.spline_selector.sum()
-        return total_nodes / total_remaining
+        return total_remaining / total_nodes
